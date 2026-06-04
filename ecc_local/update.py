@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from . import mcp
+from . import mcp, tools
 from .eccrepo import EccRepo
 from .log import Logger
 from .proc import run_stream
@@ -33,15 +33,23 @@ def update_ecc(ecc: EccRepo, logger: Optional[Logger] = None) -> bool:
     before_servers = _servers(ecc)
     before_profiles = set(ecc.profiles())
 
+    git = tools.runner("git")
+    if not git:
+        logger.err("找不到 git —— 无法更新 ECC。请安装 git 或确认它在 PATH 中。")
+        return False
     logger.info("git pull --ff-only ...")
-    code = run_stream(["git", "-C", repo, "pull", "--ff-only"], cwd=None, logger=logger)
+    code = run_stream(git + ["-C", repo, "pull", "--ff-only"], cwd=None, logger=logger)
     if code != 0:
         logger.err("git pull 失败（可能有本地改动或网络问题）。请手动检查仓库状态。")
         return False
 
-    logger.info("npm install ...")
-    run_stream(["npm", "install", "--no-audit", "--no-fund", "--loglevel=error"],
-               cwd=repo, logger=logger)
+    npm = tools.runner("npm")
+    if not npm:
+        logger.warn("找不到 npm —— 跳过依赖安装（多数更新无需重装依赖；需要时请手动 npm install）。")
+    else:
+        logger.info("npm install ...")
+        run_stream(npm + ["install", "--no-audit", "--no-fund", "--loglevel=error"],
+                   cwd=repo, logger=logger)
 
     after_ver = ecc.version() or ecc.git_info()
     after_servers = _servers(ecc)

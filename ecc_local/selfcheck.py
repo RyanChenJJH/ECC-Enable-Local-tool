@@ -4,18 +4,14 @@
 """
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+from . import tools
 from .eccrepo import EccRepo
 from .log import Logger
 
 Result = Tuple[str, str, str]  # (name, status, detail)  status ∈ PASS/WARN/FAIL
-
-
-def _which(name: str) -> Optional[str]:
-    return shutil.which(name)
 
 
 def run(ecc: EccRepo, project: Optional[str] = None, profile: Optional[str] = None,
@@ -41,10 +37,15 @@ def run(ecc: EccRepo, project: Optional[str] = None, profile: Optional[str] = No
         add(f"profile '{profile}'", "PASS" if ok else "WARN",
             "存在" if ok else "清单里没有此 profile(上游可能改名)")
 
-    # 依赖
-    add("依赖 pwsh", "PASS" if _which("pwsh") else "FAIL", _which("pwsh") or "未找到(Claude 启用需要)")
-    add("依赖 node", "PASS" if _which("node") else "FAIL", _which("node") or "未找到(Claude 安装器需要)")
-    add("依赖 git", "PASS" if _which("git") else "WARN", _which("git") or "未找到(更新 ECC 需要)")
+    # 依赖（已解析全路径；含持久 PATH 与 pwsh 常见位置，反映 exe 实际能否找到）
+    pwsh = tools.find_pwsh()
+    add("依赖 pwsh", "PASS" if pwsh else "FAIL", pwsh or "未找到(Claude 启用需要 PowerShell 7)")
+    node = tools.find("node")
+    add("依赖 node", "PASS" if node else "FAIL", node or "未找到(Claude 安装器需要)")
+    npm = tools.find("npm")
+    add("依赖 npm", "PASS" if npm else "WARN", npm or "未找到(更新 ECC 时装依赖需要)")
+    git = tools.find("git")
+    add("依赖 git", "PASS" if git else "WARN", git or "未找到(更新 ECC 需要)")
 
     # 版本
     add("ECC 版本", "PASS", ecc.version() or ecc.git_info() or "未知")

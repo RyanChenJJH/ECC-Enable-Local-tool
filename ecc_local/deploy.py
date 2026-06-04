@@ -12,7 +12,7 @@ import shutil
 from pathlib import Path
 from typing import List, Optional
 
-from . import mcp
+from . import mcp, tools
 from .eccrepo import EccRepo
 from .log import Logger
 from .proc import run_stream
@@ -76,13 +76,20 @@ def enable_claude(ecc: EccRepo, project: Path, profile: str, rules: List[str],
         _backup(claude_dir, project, logger)
 
     logger.info("启用 Claude：install.ps1 --target claude-project ...")
-    code = run_stream(
-        ["pwsh", "-NoProfile", "-File", str(ecc.install_ps1),
-         "--target", "claude-project", "--profile", profile],
-        cwd=str(project), logger=logger,
-    )
-    if code != 0:
-        logger.err(f"install.ps1 退出码 {code}，Claude 安装可能未完成。")
+    pwsh = tools.pwsh_runner()
+    if not pwsh:
+        logger.err("找不到 pwsh / powershell —— 无法运行 ECC 安装器(agents/skills/commands/hooks 将缺失)。")
+        logger.err("请安装 PowerShell 7，或确认它在 PATH 中，然后重新部署。")
+        code = 127
+    else:
+        logger.info("  使用 " + pwsh[0])
+        code = run_stream(
+            pwsh + ["-NoProfile", "-File", str(ecc.install_ps1),
+                    "--target", "claude-project", "--profile", profile],
+            cwd=str(project), logger=logger,
+        )
+        if code != 0:
+            logger.err(f"install.ps1 退出码 {code}，Claude 安装可能未完成。")
 
     rules_dest = claude_dir / "rules" / "ecc"
     rules_dest.mkdir(parents=True, exist_ok=True)

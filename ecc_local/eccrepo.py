@@ -83,9 +83,13 @@ class EccRepo:
         return None
 
     def git_info(self) -> Optional[str]:
+        from . import tools  # 延迟导入，避免循环
+        git = tools.runner("git")
+        if not git:
+            return None
         try:
             out = subprocess.run(
-                ["git", "-C", str(self.path), "describe", "--tags", "--always", "--dirty"],
+                git + ["-C", str(self.path), "describe", "--tags", "--always", "--dirty"],
                 capture_output=True, text=True, timeout=10,
             )
             if out.returncode == 0:

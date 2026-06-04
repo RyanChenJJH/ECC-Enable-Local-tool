@@ -1,5 +1,14 @@
 # Changelog
 
+## v1.2.0 — 2026-06-04
+### 修复（重要）
+- **双击 exe 时找不到 `pwsh` / `npm` 导致 Claude 静默半装**：新增可执行文件定位（`ecc_local/tools.py`）——
+  启动时合并注册表持久 PATH(机器+用户) 与 pwsh 常见位置；用 PATHEXT 解析（能找到 `npm.cmd`）；
+  `.cmd/.bat` 自动用 `cmd /c` 包裹；`pwsh` 找不到回退 `powershell`。
+- Claude 安装、ECC 更新（git/npm）、`git_info` 全部改用解析后的全路径。
+### 改进
+- Self-Check 新增 `npm` 检查，并显示各依赖的**真实解析路径**（反映 exe 实际能否找到）。
+
 ## v1.1.0 — 2026-06-04
 ### 新增
 - **应用图标**：exe 文件图标 + 窗口标题栏图标（`assets/icon.ico`，由 `assets/make_icon.py` 生成）。
