@@ -16,8 +16,11 @@ Write-Host '[build] 安装依赖...' -ForegroundColor Cyan
 & $py -m pip install -r (Join-Path $root 'requirements.txt') --quiet
 
 Write-Host '[build] PyInstaller 打包...' -ForegroundColor Cyan
+$icon = Join-Path $root 'assets\icon.ico'
 & $py -m PyInstaller --noconfirm --onefile --windowed `
   --name ECC-Enable-Local-tool `
+  --icon $icon `
+  --add-data "$icon;assets" `
   --collect-submodules ecc_local `
   (Join-Path $root 'ecc_local_gui.py')
 

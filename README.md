@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/icon.png" width="120" alt="ECC Enable Local tool">
+</p>
+
 # ECC Enable Local tool
 
 > 把 [affaan-m/ECC](https://github.com/affaan-m/ECC)（"Everything Claude Code"）**按项目**启用/停用的本地小工具。
@@ -50,7 +54,7 @@ ECC 功能强大，但默认是"全局铺开"。很多时候你**只想在个别
 
 ### 方式 A：下载 exe（推荐）
 到本仓库 **Releases** 下载 `ECC-Enable-Local-tool.exe`，双击运行。
-下载链接：https://github.com/RyanChenJJH/ECC-Enable-Local-tool/releases/download/v1.0.0/ECC-Enable-Local-tool.exe
+下载链接（始终最新版）：https://github.com/RyanChenJJH/ECC-Enable-Local-tool/releases/latest/download/ECC-Enable-Local-tool.exe
 
 ### 方式 B：从源码运行
 ```powershell
@@ -65,13 +69,49 @@ py -3.12 -m venv .venv
 
 ## 界面用法
 
-1. **ECC 仓库**：选你本地克隆的 ECC 路径（默认自动猜测同级 `..\ECC`）。
-2. **项目目录**：选要启用 ECC 的工程根目录。
-3. 勾选 **Claude** / **Codex**：
-   - Claude：选 `profile`（从 ECC 动态读取）、多选 `rules`。
-   - Codex：选 **档位①（仅 AGENTS.md）** 或 **档位②（整个 `.codex/` 含 MCP）**；档位②可点 **扫描 MCP** 动态列出服务器并勾选保留。
-4. 点 **体检** 看环境是否就绪 → **预览 DryRun** 看计划 → **一键部署**。
-5. 不想要了点 **停用**。ECC 升级了点 **更新 ECC**。
+启动后是一个小窗口，从上到下设置以下参数，最后点按钮执行。
+
+### 路径
+| 控件 | 作用 | 怎么设 |
+|---|---|---|
+| **ECC 仓库** | 指向本地克隆的 ECC 源 | 点「浏览…」选目录；默认自动猜同级 `..\ECC`，并记住上次选择 |
+| **项目目录** | 要启用/停用 ECC 的目标工程根 | 点「浏览…」选你的项目根目录 |
+
+### Claude Code
+| 控件 | 作用 | 怎么设 |
+|---|---|---|
+| **启用 Claude** | 是否对 Claude 部署 | 勾选框 |
+| **profile** | 安装规模（装多少 agents/hooks/commands），从 ECC 的 `manifests` **动态读取** | 下拉：`minimal`(最轻) / `core`(推荐) / `developer` / `security` / `research` / `full`(全量最重) |
+| **rules（可多选）** | 复制到项目 `.claude/rules/ecc/` 的**编码规范集**，Claude 据此遵循对应规范 | 在列表里**逐项点击切换选中**（可多选，再点取消）；默认已选 `common` |
+
+**rules 怎么选、选什么：**
+- `common` — 语言无关的通用工程规范（建议总是选上）。
+- `python` / `typescript` / `golang` / `java` / `rust` / `react` / `web` … — 对应语言/框架的规范，**选你这个项目实际用到的**。
+- `zh` — 中文输出/沟通规范。
+- 例：一个 Python + 前端项目可选 `common, python, web, zh`。选得越多加载的规范越多（上下文开销略增），按需即可。
+
+### Codex
+| 控件 | 作用 | 怎么设 |
+|---|---|---|
+| **启用 Codex** | 是否对 Codex 部署 | 勾选框 |
+| **档位①（仅指令）** | 只放 `AGENTS.md`，不动你平时的运行策略/MCP（最稳）| 单选 |
+| **档位②（整个 .codex/）** | 复制 `config.toml`+agents+AGENTS.md，含 MCP/profile（功能全）| 单选 |
+| **用 AGENTS.override.md** | 让本项目指令**覆盖**全局 `~/.codex/AGENTS.md`（而非叠加）| 勾选框 |
+| **保留 playwright** | 默认裁掉 playwright（较重）；勾上则保留 | 勾选框 |
+| **扫描 MCP（动态识别）** | 读 ECC 的 `.codex/config.toml`，**动态列出**所有 MCP 服务器并给保留建议 | 选档位②后点此；列表里**勾选=保留**，取消=部署时裁掉 |
+
+> MCP 建议规则：无需 key 的（`context7`/`memory`/`sequential-thinking`）默认保留；`github`/`exa` 仅在检测到对应环境变量时保留；`playwright` 默认裁掉；**未知/ECC 新增的服务器默认保留并标注**。
+
+### 操作按钮
+| 按钮 | 作用 |
+|---|---|
+| **体检 Self-Check** | 检查 ECC 接口 / 依赖(pwsh·node·git) / profile / 版本 /「全局禁用」不变式 |
+| **预览 DryRun** | 只打印将要做什么，不写任何文件 |
+| **一键部署** | 按以上设置真正部署到项目 |
+| **停用** | 移除本项目内由本工具创建的 ECC 文件（安全，不误删你自己的）|
+| **更新 ECC** | 对 ECC 仓库 `git pull` + `npm install`，并列出 MCP / profile 变更 |
+
+下方**日志窗格**实时显示每一步；底部状态栏显示忙/闲。
 
 > Codex 档位② 首次在项目里运行 `codex` 时，**务必"信任该项目"**，否则项目级 `.codex/config.toml` 不会生效。
 

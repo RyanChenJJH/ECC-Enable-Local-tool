@@ -4,4 +4,4 @@
 本包提供核心逻辑(deploy / mcp / selfcheck / update)，GUI 与 CLI 共用同一套 core。
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"

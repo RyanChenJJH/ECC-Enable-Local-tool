@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import queue
+import sys
 import threading
 import tkinter as tk
 from pathlib import Path
@@ -14,12 +15,28 @@ from .log import Logger
 PAD = 6
 
 
+def _resource(rel: str) -> Path:
+    """定位资源文件：打包后在 _MEIPASS，源码运行在仓库根。"""
+    base = getattr(sys, "_MEIPASS", None)
+    if base:
+        p = Path(base) / rel
+        if p.exists():
+            return p
+    return Path(__file__).resolve().parent.parent / rel
+
+
 class App:
     def __init__(self, root: tk.Tk):
         self.root = root
         root.title(f"ECC 局部启用工具  v{__version__}")
         root.geometry("780x680")
         root.minsize(720, 600)
+        try:
+            _ico = _resource("assets/icon.ico")
+            if _ico.exists():
+                root.iconbitmap(default=str(_ico))
+        except Exception:
+            pass
 
         self.log_queue: "queue.Queue[tuple[str, str]]" = queue.Queue()
         self.busy = False

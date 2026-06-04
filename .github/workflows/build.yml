@@ -22,6 +22,8 @@ jobs:
         run: >
           pyinstaller --noconfirm --onefile --windowed
           --name ECC-Enable-Local-tool
+          --icon assets/icon.ico
+          --add-data "assets/icon.ico;assets"
           --collect-submodules ecc_local
           ecc_local_gui.py
 
