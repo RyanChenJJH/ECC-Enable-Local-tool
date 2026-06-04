@@ -50,6 +50,7 @@ ECC 功能强大，但默认是"全局铺开"。很多时候你**只想在个别
 
 ### 方式 A：下载 exe（推荐）
 到本仓库 **Releases** 下载 `ECC-Enable-Local-tool.exe`，双击运行。
+下载链接：https://github.com/RyanChenJJH/ECC-Enable-Local-tool/releases/download/v1.0.0/ECC-Enable-Local-tool.exe
 
 ### 方式 B：从源码运行
 ```powershell
